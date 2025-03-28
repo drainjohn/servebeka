@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serve Princess Beka</title>
+    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="../shared/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="app">
+        <div id="errorPopup" class="error-popup">
+            <span id="errorMessage"></span>
+            <span class="close-error" onclick="hideError()">×</span>
+        </div>
+
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">👑</div>
+            <h1>Princess Beka</h1>
+            <div class="streak">Streak: <span id="streak">0</span></div>
+            <button id="logoutBtn" class="btn logout">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="icon">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+                </svg>
+            </button>
+        </header>
+
+        <!-- Main Layout -->
+        <div class="layout">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <nav>
+                    <button id="dashboardBtn" class="nav-btn active" title="Dashboard">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="icon">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 12h18M3 6h18M3 18h18" />
+                        </svg>
+                    </button>
+                    <button id="dutiesBtn" class="nav-btn" title="Duties">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="icon">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
+                        </svg>
+                    </button>
+                    <button id="communicationBtn" class="nav-btn" title="Communication">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="icon">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
+                        </svg>
+                    </button>
+                    <button id="progressBtn" class="nav-btn" title="Progress">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="icon">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M16.5 3.75V16.5L12 14.25 7.5 16.5V3.75m9 0H18A2.25 2.25 0 0120.25 6v12A2.25 2.25 0 0118 20.25H6A2.25 2.25 0 013.75 18V6A2.25 2.25 0 016 3.75h1.5m9 0h-9" />
+                        </svg>
+                    </button>
+                    <button id="trainingBtn" class="nav-btn" title="Training">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="icon">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                        </svg>
+                    </button>
+                    <button id="marketplaceBtn" class="nav-btn" title="Marketplace">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="icon">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72m-13.5 8.65h3.75a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v3.75c0 .415.336.75.75.75z" />
+                        </svg>
+                    </button>
+                    <button id="eventsBtn" class="nav-btn" title="Events">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="icon">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9 15h.008v.008H9V15zm0 2.25h.008v.008H9v-.008zM6.75 15h.008v.008H6.75V15zm0 2.25h.008v.008H6.75v-.008z" />
+                        </svg>
+                    </button>
+                </nav>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <section id="dashboard" class="content-section">
+                    <h2>Dashboard</h2>
+                    <div class="card-grid">
+                        <div class="card">Tasks Done: <span id="tasksCompleted">0</span></div>
+                        <div class="card">Points: <span id="rewardPoints">0</span></div>
+                        <div class="card">Messages: <span id="messageCount">0</span></div>
+                        <div class="card" id="goddessCommands">Commands: Loading...</div>
+                    </div>
+                </section>
+
+                <section id="duties" class="content-section" style="display: none;">
+                    <h2>Duties</h2>
+                    <div class="tabbed-content">
+                        <div class="tabs">
+                            <div class="tab active" data-tab="daily">Daily Quests</div>
+                            <div class="tab" data-tab="tasks">Tasks</div>
+                            <div class="tab" data-tab="challenges">Challenges</div>
+                        </div>
+
+                        <div id="daily" class="tab-panel">
+                            <div id="dailyQuests"></div>
+                        </div>
+                        <div id="tasks" class="tab-panel" style="display: none;">
+                            <div id="taskList"></div>
+                        </div>
+                        <div id="challenges" class="tab-panel" style="display: none;">
+                            <div id="challengeList"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="communication" class="content-section" style="display: none;">
+                    <h2>Communication</h2>
+                    <div class="tabbed-content">
+                        <div class="tabs">
+                            <div class="tab active" data-tab="chat">Chat</div>
+                            <div class="tab" data-tab="announcements">Announcements</div>
+                        </div>
+                        
+                        <div id="chat" class="tab-panel">
+                            <div class="chat-container">
+                                <div class="chat-header">
+                                    <div class="profile-circle">👑</div>
+                                    <span>Princess Beka</span>
+                                    <span class="online-indicator"></span>
+                                </div>
+                                <div id="chatMessages" class="chat-box"></div>
+                                <div class="chat-input">
+                                    <input type="text" id="chatInput" placeholder="Serve with words...">
+                                    <button id="sendMessage" class="btn send-btn">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="send-icon">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="announcements" class="tab-panel" style="display: none;"><div id="announcementList"></div></div>
+                    </div>
+                </section>
+
+                <section id="progress" class="content-section" style="display: none;">
+                    <h2>Progress</h2>
+                    <div class="tabbed-content">
+                        <div class="tabs">
+                            <div class="tab active" data-tab="rewards">Rewards</div>
+                            <div class="tab" data-tab="leaderboard">Leaderboard</div>
+                            <div class="tab" data-tab="profile">Profile</div>
+                        </div>
+                        
+                        <div id="rewards" class="tab-panel">
+                            <div class="card">Points: <span id="totalPoints">0</span></div>
+                            <div class="card">Rank: <span id="rank">Novice</span></div>
+                            <div id="badgeList" class="badge-grid"></div>
+                        </div>
+                        <div id="leaderboard" class="tab-panel" style="display: none;">
+                            <div id="leaderboardList"></div>
+                        </div>
+                        <div id="profile" class="tab-panel" style="display: none;">
+                            <div class="card">Username: <span id="username"></span></div>
+                            <div class="card devotion-meter">
+                                Devotion: <svg viewBox="0 0 36 36" class="circle-svg">
+                                    <path class="circle-bg"
+                                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                    <path id="devotionCircle" class="circle" stroke-dasharray="0, 100"
+                                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                </svg>
+                                <span id="devotion">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="training" class="content-section" style="display: none;">
+                    <h2>Training</h2>
+                    <div class="tabbed-content">
+                        <div class="tabs">
+                            <div class="tab active" data-tab="lessons">Lessons</div>
+                            <div class="tab" data-tab="quizzes">Quizzes</div>
+                        </div>
+                        
+                        <div id="lessons" class="tab-panel">
+                            <div id="lessonList"></div>
+                        </div>
+                        <div id="quizzes" class="tab-panel" style="display: none;">
+                            <div id="quizList"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="marketplace" class="content-section" style="display: none;">
+                    <h2>Marketplace</h2>
+                    <div class="tabbed-content">
+                        <div class="tabs">
+                            <div class="tab active" data-tab="shop">Shop</div>
+                            <div class="tab" data-tab="auctions">Auctions</div> 
+                        </div>
+                        <div id="shop" class="tab-panel">
+                            <div id="shopItems"></div>
+                        </div>
+                        <div id="auctions" class="tab-panel" style="display: none;">
+                            <div id="auctionList"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="events" class="content-section" style="display: none;">
+                    <h2>Events</h2>
+                    <div class="tabbed-content">
+                        <div class="tabs">
+                            <div class="tab active" data-tab="current">Current Events</div>
+                            <div class="tab" data-tab="past">Past Events</div>
+                        </div>
+                        
+                        <div id="current" class="tab-panel">
+                            <div id="eventList"></div>
+                        </div>
+                        <div id="past" class="tab-panel" style="display: none;">
+                            <div id="pastEventList"></div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="notifications" id="notifications"></div>
+        </footer>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <!-- Shared Scripts -->
+    <script src="../shared/firebase-config.js"></script>
+    <script src="../shared/auth.js"></script>
+    <script src="../shared/db.js"></script>
+    <script src="../shared/modal.js"></script>
+
+    <!-- Slave Script -->
+    <script src="./script.js"></script>
+</body>
+
+</html>

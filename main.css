@@ -1,0 +1,151 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    background: #0f0f0f;
+    color: #e0e0e0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.app {
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+    position: relative; /* For positioning the error popup */
+}
+
+.auth-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.logo {
+    font-size: 2.5rem;
+}
+
+h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #fff;
+}
+
+input {
+    width: 100%;
+    padding: 14px;
+    background: #1a1a1a;
+    color: #e0e0e0;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: #888 1px solid;
+    outline: none;
+}
+
+input:focus {
+    border-color: #eaeaea;
+}
+
+input::placeholder {
+    color: #a0a0a0;
+}
+
+.btn {
+    width: 100%;
+    padding: 14px;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: background 0.3s ease;
+    border: none;
+    outline: none;
+}
+
+.login {
+    background: #8b5cf6;
+    color: #fff;
+}
+
+.login:hover {
+    background: #7c3aed;
+}
+
+.signup {
+    background: transparent;
+    color: #e0e0e0;
+    border: 1px solid #404040;
+}
+
+.signup:hover {
+    background: #404040;
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 10px;
+    margin: 10px 0;
+}
+
+.divider hr {
+    flex: 1;
+    border: none;
+    height: 1px;
+    background: #404040;
+}
+
+.divider span {
+    font-size: 0.9rem;
+    color: #a0a0a0;
+}
+
+.terms {
+    font-size: 0.8rem;
+    color: #a0a0a0;
+    text-align: center;
+    margin-top: 20px;
+}
+
+/* Error Popup Styles */
+.error-popup {
+    display: none;
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #f87171;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: center;
+    z-index: 2000;
+}
+
+.error-popup .close-error {
+    margin-left: 10px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #fff;
+    transition: color 0.3s ease;
+}
+
+.error-popup .close-error:hover {
+    color: #e0e0e0;
+}
+
+.error-popup .close-error svg {
+    width: 20px;
+    height: 20px;
+}

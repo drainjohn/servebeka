@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Princess Beka</title>
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="./shared/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="app">
+        <div id="errorPopup" class="error-popup">
+            <span id="errorMessage"></span>
+            <span class="close-error" onclick="hideError()"><svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                </svg>
+            </span>
+        </div>
+        <div class="auth-container">
+            <div class="logo">👑</div>
+            <h1>Princess Beka</h1>
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button id="loginBtn" class="btn login">Login</button>
+            <div class="divider">
+                <hr><span>or</span>
+                <hr>
+            </div>
+            <button id="signupBtn" class="btn signup">Sign Up</button>
+            <p class="terms">By continuing, you agree to serve Princess Beka unconditionally.</p>
+        </div>
+
+        <!-- Modals -->
+        <div id="signupModal" class="modal"></div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    <!-- Shared Scripts -->
+    <script src="./shared/firebase-config.js"></script>
+    <script src="./shared/auth.js"></script>
+    <script src="./shared/db.js"></script>
+    <script src="./shared/modal.js"></script>
+
+    <!-- Main Script -->
+    <script src="main.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Princess Beka's Dominion</title>
+    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="../shared/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="app">
+        <div id="errorPopup" class="error-popup">
+            <span id="errorMessage"></span>
+            <span class="close-error" onclick="hideError()">×</span>
+        </div>
+
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">👑</div>
+            <h1>Princess Beka</h1>
+            <div class="quick-stats">
+                <span>Slaves: <span id="slaveCount">0</span></span>
+                <span>Tasks: <span id="taskCount">0</span></span>
+            </div>
+            <button id="logoutBtn" class="btn logout">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="icon">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+                </svg>
+            </button>
+        </header>
+
+        <!-- Main Layout -->
+        <div class="layout">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <nav>
+                    <button id="overviewBtn" class="nav-btn active" title="Overview">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="icon">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 12h18M3 6h18M3 18h18" />
+                        </svg>
+                    </button>
+                    <button id="slavesBtn" class="nav-btn" title="Slaves">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="icon">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                        </svg>
+                    </button>
+                    <button id="managementBtn" class="nav-btn" title="Management">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="icon">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
+                        </svg>
+                    </button>
+                    <button id="communicationBtn" class="nav-btn" title="Communication">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="icon">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
+                        </svg>
+                    </button>
+                    <button id="analyticsBtn" class="nav-btn" title="Analytics">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="icon">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                        </svg>
+                    </button>
+                </nav>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <section id="overview" class="content-section">
+                    <h2>Overview</h2>
+                    <div class="card-grid">
+                        <div class="card">Active Slaves: <span id="activeSlaves">0</span></div>
+                        <div class="card">Pending Requests: <span id="pendingCount">0</span></div>
+                        <div class="card">Total Points: <span id="totalPoints">0</span></div>
+                        <div class="card">Tasks Completed: <span id="tasksCompleted">0</span></div>
+                    </div>
+                </section>
+
+                <section id="slaves" class="content-section" style="display: none;">
+                    <h2>Slaves</h2>
+                    <div class="tabbed-content">
+                        <div class="tabs">
+                            <div class="tab active" data-tab="pending">Pending</div>
+                            <div class="tab" data-tab="active">Active</div>
+                            <div class="tab" data-tab="blocked">Blocked</div>
+                        </div>
+
+                        <div id="pending" class="tab-panel">
+                            <div id="pendingRequests"></div>
+                        </div>
+                        <div id="active" class="tab-panel" style="display: none;">
+                            <div id="activeSlaves"></div>
+                        </div>
+                        <div id="blocked" class="tab-panel" style="display: none;">
+                            <div id="blockedSlaves"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="management" class="content-section" style="display: none;">
+                    <h2>Management</h2>
+                    <div class="tabbed-content">
+                        <div class="tabs">
+                            <div class="tab active" data-tab="tasks">Tasks</div>
+                            <div class="tab" data-tab="rewards">Rewards</div>
+                            <div class="tab" data-tab="training">Training</div>
+                            <div class="tab" data-tab="marketplace">Marketplace</div>
+                            <div class="tab" data-tab="events">Events</div>
+                        </div>
+
+                        <div id="tasks" class="tab-panel">
+                            <div class="form">
+                                <input type="text" id="taskTitle" placeholder="Task Title">
+                                <input type="number" id="taskPoints" placeholder="Points" min="1">
+                                <select id="taskSlave">
+                                    <option value="all">All Slaves</option>
+                                </select>
+                                <button id="assignTask" class="btn">Assign</button>
+                            </div>
+                            <div id="taskList"></div>
+                        </div>
+                        <div id="rewards" class="tab-panel" style="display: none;">
+                            <div class="form">
+                                <select id="rewardSlave">
+                                    <option value="">Select Slave</option>
+                                </select>
+                                <input type="number" id="rewardPoints" placeholder="Points" min="1">
+                                <button id="awardPoints" class="btn">Award</button>
+                            </div>
+                            <div id="rewardList"></div>
+                        </div>
+                        <div id="training" class="tab-panel" style="display: none;">
+                            <div class="form">
+                                <input type="text" id="lessonTitle" placeholder="Lesson Title">
+                                <button id="addLesson" class="btn">Add</button>
+                            </div>
+                            <div id="lessonList"></div>
+                        </div>
+                        <div id="marketplace" class="tab-panel" style="display: none;">
+                            <div class="form">
+                                <input type="text" id="itemName" placeholder="Item Name">
+                                <input type="number" id="itemCost" placeholder="Cost" min="1">
+                                <button id="addItem" class="btn">Add</button>
+                            </div>
+                            <div id="shopItems"></div>
+                        </div>
+                        <div id="events" class="tab-panel" style="display: none;">
+                            <div class="form">
+                                <input type="text" id="eventTitle" placeholder="Event Title">
+                                <input type="date" id="eventEndDate" placeholder="End Date">
+                                <button id="createEvent" class="btn">Create</button>
+                            </div>
+                            <div id="eventList"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="communication" class="content-section" style="display: none;">
+                    <h2>Communication</h2>
+                    <div class="tabbed-content">
+                        <div class="tabs">
+                            <div class="tab active" data-tab="chat">Chat</div>
+                            <div class="tab" data-tab="commands">Commands</div>
+                            <div class="tab" data-tab="announcements">Announcements</div>
+                        </div>
+
+                        <div id="chat" class="tab-panel">
+                            <div class="chat-layout">
+                                <aside class="chat-sidebar">
+                                    <div class="chat-list" id="chatList"></div>
+                                </aside>
+                                <div class="chat-main">
+                                    <div class="chat-header" id="chatHeader">
+                                        <div class="profile-circle" id="chatProfileCircle"></div>
+                                        <span id="chatRecipientName">Select a chat</span>
+                                    </div>
+                                    <div id="chatMessages" class="chat-box"></div>
+                                    <div class="chat-input">
+                                        <input type="text" id="chatInput" placeholder="Command your slaves...">
+                                        <button id="sendMessage" class="btn send-btn">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                stroke-width="1.5" stroke="currentColor" class="send-icon">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="commands" class="tab-panel" style="display: none;">
+                            <div class="form">
+                                <input type="text" id="commandInput" placeholder="Issue a divine command...">
+                                <button id="sendCommand" class="btn">Proclaim</button>
+                            </div>
+                            <div id="commandList"></div>
+                        </div>
+                        <div id="announcements" class="tab-panel" style="display: none;">
+                            <div class="form">
+                                <input type="text" id="announcementInput" placeholder="Announce to all...">
+                                <button id="sendAnnouncement" class="btn">Announce</button>
+                            </div>
+                            <div id="announcementList"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="analytics" class="content-section" style="display: none;">
+                    <h2>Analytics</h2>
+                    <div class="card-grid">
+                        <div class="card">Avg Points/Slave: <span id="avgPoints">0</span></div>
+                        <div class="card">Task Completion Rate: <span id="completionRate">0%</span></div>
+                        <div class="card">Most Active Slave: <span id="mostActive"></span></div>
+                        <div class="card">Total Messages: <span id="totalMessages">0</span></div>
+                    </div>
+                </section>
+            </main>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="notifications" id="notifications"></div>
+        </footer>
+    </div>
+
+    <div id="slaveStatsModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeSlaveStatsModal()"><svg xmlns="http://www.w3.org/2000/svg"
+                    fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                </svg>
+            </span>
+            <h2 id="slaveStatsName">Slave Stats</h2>
+            <div id="slaveStatsContent" class="stats-grid"></div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <!-- Shared Scripts -->
+    <script src="../shared/firebase-config.js"></script>
+    <script src="../shared/auth.js"></script>
+    <script src="../shared/db.js"></script>
+    <script src="../shared/modal.js"></script>
+
+    <!-- Goddess Script -->
+    <script src="./script.js"></script>
+</body>
+
+</html>
