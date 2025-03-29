@@ -85,38 +85,70 @@ h1 {
 
 /* Sidebar */
 .sidebar {
-    width: 60px;
-    background: rgba(26, 26, 26, 0.9);
-    padding: 15px 0;
+    width: 72px;
+    background: #121214;
+    padding: 10px;
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: 10px;
 }
 
 nav {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
+    width: 100%;
+    margin-right: 1px solid #29282d;
 }
 
 .nav-btn {
-    padding: 10px;
-    background: transparent;
-    color: #e0e0e0;
-    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #201f24;
+    color: #fff;
+    border: none;
+    outline: none;
+    border-radius: 15px;
     cursor: pointer;
-    transition: background 0.3s ease, transform 0.2s ease;
+    transition: background 0.2s ease, color 0.2s ease;
     position: relative;
+    width: 45px;
+    height: 45px;
+}
+
+.nav-btn span {
+    display: none;
+    position: absolute;
+    left: 70px;
+    border-radius: 15px;
+    background: #222224;
+    padding: 10px 15px;
+    border-radius: 3px;
+    font-size: 16px;
+    font-weight: 500;
+    white-space: nowrap;
+    pointer-events: none;
 }
 
 .nav-btn:hover {
-    background: #404040;
-    transform: scale(1.1);
+    background: #5865f2;
+    color: #fff;
+}
+
+.nav-btn svg {
+    width: 20px;
+    height: 20px;
 }
 
 .nav-btn.active {
-    background: #8b5cf6;
+    background: #5865f2;
     color: #fff;
+}
+
+.nav-btn:active {
+    transform: translateY(3px);
 }
 
 .nav-btn[title]:hover:after {
