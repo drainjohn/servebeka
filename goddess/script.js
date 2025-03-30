@@ -1,3 +1,142 @@
+document.addEventListener('DOMContentLoaded', () => {
+    const passwordModal = document.getElementById('passwordModal');
+    const submitPasswordBtn = document.getElementById('submitPassword');
+    const passwordInput = document.getElementById('goddessPassword');
+    const passwordError = document.getElementById('passwordError');
+    const appContainer = document.querySelector('.app');
+    const rtDb = firebase.database();
+    let correctPassword = '';
+
+    // Cookie handling functions
+    function setCookie(name, value, days) {
+        const expires = new Date();
+        expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+        document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Strict`;
+    }
+
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+    }
+
+    function deleteCookie(name) {
+        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+    }
+
+    // Check for existing login cookie
+    const loginToken = getCookie('goddessLogin');
+    if (loginToken === 'authenticated') {
+        console.log('Cookie found, bypassing modal');
+        passwordModal.style.display = 'none';
+        appContainer.classList.remove('hidden');
+        enableContextMenus();
+        loadGoddessData({ uid: 'goddess' });
+    } else {
+        // Show modal and hide app if no valid cookie
+        passwordModal.style.display = 'flex';
+        appContainer.classList.add('hidden');
+        console.log('No valid cookie, showing modal');
+    }
+
+    // Disable context menu and dev tools
+    function disableContextMenus() {
+        document.body.style.userSelect = 'none';
+        document.body.style.pointerEvents = 'none';
+        passwordModal.style.pointerEvents = 'auto';
+        document.addEventListener('contextmenu', preventContextMenu);
+        document.addEventListener('keydown', preventDevTools);
+    }
+
+    function enableContextMenus() {
+        document.body.style.userSelect = '';
+        document.body.style.pointerEvents = '';
+        document.removeEventListener('contextmenu', preventContextMenu);
+        document.removeEventListener('keydown', preventDevTools);
+    }
+
+    function preventContextMenu(e) {
+        e.preventDefault();
+    }
+
+    function preventDevTools(e) {
+        if ((e.key === 'F12') ||
+            (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'C' || e.key === 'J')) ||
+            (e.ctrlKey && e.key === 'U')) {
+            e.preventDefault();
+        }
+    }
+
+    // Fetch password and lock page if modal is shown
+    rtDb.ref('goddess/password').once('value', snap => {
+        correctPassword = snap.val() || 'defaultPassword';
+        console.log('Password fetched:', correctPassword);
+        if (passwordModal.style.display === 'flex') {
+            disableContextMenus();
+            passwordInput.focus();
+        }
+    }).catch(err => {
+        console.error('Error fetching password:', err);
+        showError('Failed to load security settings');
+        passwordModal.style.display = 'flex';
+    });
+
+    // Handle password submission
+    submitPasswordBtn.addEventListener('click', verifyPassword);
+    passwordInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') verifyPassword();
+    });
+
+    function verifyPassword() {
+        const enteredPassword = passwordInput.value.trim();
+        if (enteredPassword === correctPassword) {
+            console.log('Password correct, setting cookie and unlocking');
+            setCookie('goddessLogin', 'authenticated', 7); // Cookie lasts 7 days
+            passwordModal.style.display = 'none';
+            appContainer.classList.remove('hidden');
+            enableContextMenus();
+            loadGoddessData({ uid: 'goddess' });
+        } else {
+            console.log('Incorrect password');
+            passwordError.style.display = 'block';
+            passwordInput.value = '';
+            passwordInput.focus();
+        }
+    }
+
+    // Load app content
+    function loadGoddessData(user) {
+        console.log('Loading app content');
+        loadOverview();
+        loadSlaves();
+        loadManagement();
+        loadCommunication(user.uid);
+        loadAnalytics();
+        populateSlaveDropdowns();
+        updateSecondarySidebar('overview');
+    }
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+        console.log('Logging out, clearing cookie');
+        deleteCookie('goddessLogin');
+        passwordModal.style.display = 'flex';
+        appContainer.classList.add('hidden');
+        passwordInput.value = '';
+        passwordError.style.display = 'none';
+        disableContextMenus();
+    });
+
+    // Safety check for overlaps
+    setTimeout(() => {
+        if (passwordModal.style.display === 'flex' && getCookie('goddessLogin') !== 'authenticated') {
+            console.warn('Modal still visible after 5s, enforcing visibility');
+            appContainer.classList.add('hidden');
+        }
+    }, 5000);
+});
+
 // Utility Functions
 function showError(message) {
     const popup = document.getElementById('errorPopup');
@@ -143,8 +282,43 @@ function loadGoddessData(user) {
 }
 
 // Overview
+// Overview
 function loadOverview() {
     const db = firebase.firestore();
+    const overviewSection = document.getElementById('overview');
+
+    // Add additional containers dynamically if not present
+    if (!overviewSection.querySelector('.recent-activity')) {
+        overviewSection.innerHTML += `
+            <div class="recent-activity">
+                <h3>Recent Activity</h3>
+                <div id="activityLog"></div>
+            </div>
+            <div class="performance-trends">
+                <h3>Performance Trends</h3>
+                <div id="trendFilters" class="form">
+                    <select id="trendMetric">
+                        <option value="points">Points</option>
+                        <option value="tasks">Tasks Completed</option>
+                        <option value="streak">Streak</option>
+                    </select>
+                    <select id="trendPeriod">
+                        <option value="7">Last 7 Days</option>
+                        <option value="30">Last 30 Days</option>
+                        <option value="90">Last 90 Days</option>
+                    </select>
+                </div>
+                <canvas id="trendChart"></canvas>
+            </div>
+            <div class="custom-widgets">
+                <h3>Custom Widgets</h3>
+                <div id="widgetGrid" class="card-grid"></div>
+                <button id="addWidgetBtn" class="btn">Add Widget</button>
+            </div>
+        `;
+    }
+
+    // Quick Stats Updates
     db.collection('slaves').where('allowed', '==', true).onSnapshot(snap => {
         document.getElementById('activeSlaves').innerText = snap.size;
         document.getElementById('slaveCount').innerText = snap.size;
@@ -163,21 +337,63 @@ function loadOverview() {
         document.getElementById('taskCount').innerText = snap.size;
     });
 
+    // Enhanced Charts
     const pointsChart = new Chart(document.getElementById('pointsChart'), {
         type: 'line',
-        data: { labels: [], datasets: [{ label: 'Points Over Time', data: [], borderColor: '#7289da', tension: 0.1 }] },
-        options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { labels: { color: '#dcddde' } } } }
-    });
-    const taskChart = new Chart(document.getElementById('taskChart'), {
-        type: 'bar',
-        data: { labels: [], datasets: [{ label: 'Tasks Completed', data: [], backgroundColor: '#7289da' }] },
-        options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { labels: { color: '#dcddde' } } } }
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Points Over Time',
+                data: [],
+                borderColor: '#7289da',
+                tension: 0.1,
+                fill: true,
+                backgroundColor: 'rgba(114, 137, 218, 0.2)'
+            }]
+        },
+        options: {
+            scales: {
+                y: { beginAtZero: true, title: { display: true, text: 'Points', color: '#dcddde' } },
+                x: { title: { display: true, text: 'Date', color: '#dcddde' } }
+            },
+            plugins: {
+                legend: { labels: { color: '#dcddde' } },
+                tooltip: { mode: 'index', intersect: false }
+            },
+            responsive: true
+        }
     });
 
-    db.collection('rewards').orderBy('timestamp', 'desc').onSnapshot(snap => {
-        const data = snap.docs.map(doc => ({ timestamp: doc.data().timestamp?.toDate(), points: doc.data().points }));
+    const taskChart = new Chart(document.getElementById('taskChart'), {
+        type: 'bar',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Tasks Completed',
+                data: [],
+                backgroundColor: '#7289da',
+                borderColor: '#5865f2',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: { beginAtZero: true, title: { display: true, text: 'Tasks', color: '#dcddde' } },
+                x: { title: { display: true, text: 'Slave', color: '#dcddde' } }
+            },
+            plugins: { legend: { labels: { color: '#dcddde' } } },
+            responsive: true
+        }
+    });
+
+    // Populate Charts with Data
+    db.collection('rewards').orderBy('timestamp', 'desc').limit(50).onSnapshot(snap => {
+        const data = snap.docs.map(doc => ({
+            timestamp: doc.data().timestamp?.toDate(),
+            points: doc.data().points || 0
+        }));
         pointsChart.data.labels = data.map(d => d.timestamp ? new Date(d.timestamp).toLocaleDateString() : 'Unknown');
-        pointsChart.data.datasets[0].data = data.map(d => d.points || 0);
+        pointsChart.data.datasets[0].data = data.map(d => d.points);
         pointsChart.update();
     });
 
@@ -192,18 +408,149 @@ function loadOverview() {
         });
     });
 
+    // Leaderboard with More Details
     db.collection('rewards').orderBy('points', 'desc').limit(5).onSnapshot(snap => {
         const leaderboardList = document.getElementById('leaderboardList');
-        leaderboardList.innerHTML = '';
+        leaderboardList.innerHTML = '<h4>Top Performers</h4>';
         snap.forEach(doc => {
             db.collection('slaves').doc(doc.id).get().then(slaveDoc => {
-                const item = document.createElement('div');
-                item.className = 'item';
-                item.innerHTML = `${slaveDoc.data().username} - ${doc.data().points} pts`;
-                leaderboardList.appendChild(item);
+                if (slaveDoc.exists) {
+                    const slave = slaveDoc.data();
+                    const item = document.createElement('div');
+                    item.className = 'item';
+                    item.innerHTML = `
+                        <span>${slave.username}</span>
+                        <span>${doc.data().points} pts | Streak: ${slave.streak || 0}</span>
+                        <button class="btn" onclick="viewSlave('${doc.id}')">View</button>
+                    `;
+                    leaderboardList.appendChild(item);
+                }
             });
         });
     });
+
+    // Recent Activity Log
+    const activityLog = document.getElementById('activityLog');
+    const activitySources = [
+        db.collection('tasks').orderBy('timestamp', 'desc').limit(10),
+        db.collection('rewards').orderBy('timestamp', 'desc').limit(10),
+        db.collection('events').orderBy('timestamp', 'desc').limit(10)
+    ];
+    activitySources.forEach(source => {
+        source.onSnapshot(snap => {
+            snap.docChanges().forEach(change => {
+                const data = change.doc.data();
+                const timestamp = data.timestamp?.toDate() || new Date();
+                const type = change.doc.ref.path.split('/')[0];
+                let message = '';
+                if (type === 'tasks') message = `${data.title} ${data.completed ? 'completed' : 'assigned'} for ${data.points} pts`;
+                if (type === 'rewards') message = `${data.points} pts awarded (${data.type})`;
+                if (type === 'events') message = `Event "${data.title}" ${change.type === 'added' ? 'created' : 'updated'}`;
+                const logItem = document.createElement('div');
+                logItem.className = 'item';
+                logItem.innerHTML = `<span>${message}</span><span>${timestamp.toLocaleString()}</span>`;
+                activityLog.prepend(logItem);
+                if (activityLog.children.length > 20) activityLog.removeChild(activityLog.lastChild);
+            });
+        });
+    });
+
+    // Performance Trends Chart
+    const trendChart = new Chart(document.getElementById('trendChart'), {
+        type: 'line',
+        data: { labels: [], datasets: [{ label: 'Trend', data: [], borderColor: '#43b581', tension: 0.1, fill: true, backgroundColor: 'rgba(67, 181, 129, 0.2)' }] },
+        options: {
+            scales: { y: { beginAtZero: true }, x: { title: { display: true, text: 'Date', color: '#dcddde' } } },
+            plugins: { legend: { labels: { color: '#dcddde' } } },
+            responsive: true
+        }
+    });
+
+    function updateTrendChart(metric, period) {
+        const cutoff = new Date();
+        cutoff.setDate(cutoff.getDate() - parseInt(period));
+        let collection = metric === 'points' ? 'rewards' : metric === 'tasks' ? 'tasks' : 'slaves';
+        let field = metric === 'points' ? 'points' : metric === 'tasks' ? 'completed' : 'streak';
+        db.collection(collection).where('timestamp', '>=', firebase.firestore.Timestamp.fromDate(cutoff)).onSnapshot(snap => {
+            const data = snap.docs.map(doc => ({
+                timestamp: doc.data().timestamp?.toDate() || new Date(),
+                value: metric === 'tasks' ? (doc.data().completed ? 1 : 0) : (doc.data()[field] || 0)
+            }));
+            const grouped = data.reduce((acc, d) => {
+                const date = d.timestamp.toLocaleDateString();
+                acc[date] = (acc[date] || 0) + d.value;
+                return acc;
+            }, {});
+            trendChart.data.labels = Object.keys(grouped).sort();
+            trendChart.data.datasets[0].data = Object.values(grouped);
+            trendChart.data.datasets[0].label = `${metric.charAt(0).toUpperCase() + metric.slice(1)} (Last ${period} Days)`;
+            trendChart.options.scales.y.title.text = metric === 'tasks' ? 'Tasks Completed' : metric.charAt(0).toUpperCase() + metric.slice(1);
+            trendChart.update();
+        });
+    }
+
+    document.getElementById('trendMetric').addEventListener('change', (e) => updateTrendChart(e.target.value, document.getElementById('trendPeriod').value));
+    document.getElementById('trendPeriod').addEventListener('change', (e) => updateTrendChart(document.getElementById('trendMetric').value, e.target.value));
+    updateTrendChart('points', '7'); // Default
+
+    // Custom Widgets
+    const widgetGrid = document.getElementById('widgetGrid');
+    const widgetTypes = {
+        'top-slave': () => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = '<span>Top Slave</span><span id="widgetTopSlave">Loading...</span>';
+            db.collection('rewards').orderBy('points', 'desc').limit(1).onSnapshot(snap => {
+                if (snap.size) {
+                    db.collection('slaves').doc(snap.docs[0].id).get().then(doc => {
+                        card.querySelector('#widgetTopSlave').innerText = `${doc.data().username} (${snap.docs[0].data().points} pts)`;
+                    });
+                }
+            });
+            return card;
+        },
+        'task-progress': () => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = '<span>Avg Task Progress</span><span id="widgetTaskProgress">Loading...</span>';
+            db.collection('tasks').onSnapshot(snap => {
+                const avg = snap.docs.reduce((acc, doc) => acc + (doc.data().progress || 0), 0) / (snap.size || 1);
+                card.querySelector('#widgetTaskProgress').innerText = `${Math.round(avg)}%`;
+            });
+            return card;
+        },
+        'message-count': () => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = '<span>Messages Today</span><span id="widgetMessageCount">Loading...</span>';
+            let count = 0;
+            const today = new Date().setHours(0, 0, 0, 0);
+            db.collection('slaves').where('allowed', '==', true).get().then(snap => {
+                snap.forEach(doc => {
+                    firebase.database().ref(`chats/${doc.id}/messages`).orderByChild('timestamp').startAt(today).on('value', msgSnap => {
+                        count += msgSnap.val() ? Object.keys(msgSnap.val()).length : 0;
+                        card.querySelector('#widgetMessageCount').innerText = count;
+                    });
+                });
+            });
+            return card;
+        }
+    };
+
+    document.getElementById('addWidgetBtn').addEventListener('click', () => {
+        const type = prompt('Enter widget type (top-slave, task-progress, message-count):');
+        if (widgetTypes[type]) {
+            const widget = widgetTypes[type]();
+            widget.innerHTML += '<button class="btn logout" onclick="this.parentElement.remove()">Remove</button>';
+            widgetGrid.appendChild(widget);
+            showNotification(`Added ${type} widget`);
+        } else {
+            showError('Invalid widget type');
+        }
+    });
+
+    // Load saved widgets (example, extend as needed)
+    ['top-slave', 'task-progress'].forEach(type => widgetGrid.appendChild(widgetTypes[type]()));
 }
 
 // Slaves
@@ -211,7 +558,7 @@ function loadOverview() {
 function showSection(sectionId, subSection = 'pending') {
     document.querySelectorAll('.section').forEach(section => section.style.display = 'none');
     document.getElementById(sectionId).style.display = 'block';
-    
+
     // Update sidebar active state
     document.querySelectorAll('.sidebar .nav-item').forEach(item => item.classList.remove('active'));
     document.querySelector(`.sidebar .nav-item[onclick="showSection('${sectionId}', '${subSection}')"]`)?.classList.add('active');
@@ -228,7 +575,7 @@ function loadSlaves() {
     const blockedSlaves = document.getElementById('blockedSlaves');
 
     // Verify DOM elements exist
-    if (!pendingRequests || !activeSlaves || !blockedSlaves) {
+    if (!pendingRequests || !activeSlavesNow || !blockedSlaves) {
         console.error('One or more slave containers not found in DOM');
         return;
     }
@@ -236,7 +583,7 @@ function loadSlaves() {
     db.collection('slaves').onSnapshot(snap => {
         // Clear containers and add headers
         pendingRequests.innerHTML = '<h3>Pending Requests</h3>';
-        activeSlaves.innerHTML = '<h3>Active Slaves</h3>';
+        activeSlavesNow.innerHTML = '<h3>Active Slaves</h3>';
         blockedSlaves.innerHTML = '<h3>Blocked Slaves</h3>';
 
         console.log(`Total slaves in snapshot: ${snap.size}`); // Debug log
@@ -247,6 +594,7 @@ function loadSlaves() {
             slaveDiv.className = 'item slave-item';
             slaveDiv.dataset.slaveId = doc.id;
 
+            // Base slave info
             slaveDiv.innerHTML = `
                 <span>${slave.username} (${slave.email}) - ${slave.streak || 0} days</span>
                 <div class="slave-actions">
@@ -256,7 +604,10 @@ function loadSlaves() {
                     ` : ''}
                     ${slave.allowed && slave.request !== 'banned' && slave.request !== 'pending' ? `
                         <button class="btn" onclick="viewSlave('${doc.id}')">View</button>
-                        <button class="btn logout" onclick="banSlave('${doc.id}')">Ban</button>
+                        <button class="btn" onclick="messageSlave('${doc.id}')">Message</button>
+                        <button class="btn" onclick="rewardSlave('${doc.id}')">Reward</button>
+                        <button class="btn" onclick="banSlave('${doc.id}')">Ban</button>
+                        <button class="btn logout" onclick="removeSlave('${doc.id}')">Remove</button>
                     ` : ''}
                     ${slave.request === 'banned' ? `
                         <button class="btn" onclick="retrieveSlave('${doc.id}')">Retrieve</button>
@@ -290,6 +641,46 @@ function loadSlaves() {
     });
 }
 
+// Action Functions (add these if not already present)
+function messageSlave(slaveId) {
+    document.getElementById('communicationBtn').click(); // Switch to Communication tab
+    setTimeout(() => {
+        const chatItem = document.querySelector(`.chat-item[data-slave-id="${slaveId}"]`);
+        if (chatItem) chatItem.click();
+    }, 100);
+}
+
+function rewardSlave(slaveId) {
+    const points = prompt('Enter points to reward:');
+    if (points && !isNaN(points)) {
+        firebase.firestore().collection('rewards').doc(slaveId).set({
+            points: parseInt(points),
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true }).then(() => showNotification(`Awarded ${points} points`));
+    }
+}
+
+function banSlave(slaveId) {
+    firebase.firestore().collection('slaves').doc(slaveId).update({
+        request: 'banned', // Match your existing field usage
+        banDate: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => showNotification('Slave banned'));
+}
+
+function removeSlave(slaveId) {
+    if (confirm('Are you sure you want to remove this slave?')) {
+        firebase.firestore().collection('slaves').doc(slaveId).delete()
+            .then(() => showNotification('Slave removed'));
+    }
+}
+
+function retrieveSlave(slaveId) {
+    firebase.firestore().collection('slaves').doc(slaveId).update({
+        request: 'approved', // Assuming 'approved' reverts to active status
+        banDate: firebase.firestore.FieldValue.delete()
+    }).then(() => showNotification('Slave retrieved'));
+}
+
 function approveSlave(uid) {
     firebase.firestore().collection('slaves').doc(uid).update({
         allowed: true,
@@ -305,13 +696,6 @@ function blockSlave(uid) {
         request: 'banned', // Changed to 'banned' for consistency
         allowed: false
     }).then(() => showNotification('Slave rejected'));
-}
-
-function banSlave(uid) {
-    firebase.firestore().collection('slaves').doc(uid).update({
-        allowed: false,
-        request: 'banned'
-    }).then(() => showNotification('Slave banned'));
 }
 
 function retrieveSlave(uid) {
@@ -341,7 +725,6 @@ function showSlaveStatsModal(slaveId, slave) {
     modal.innerHTML = `
         <div class="modal-content">
             <h2>${slave.username}'s Stats</h2>
-            <p>Email: ${slave.email}</p>
             <p>Level: ${slave.level || 1}</p>
             <p>Streak: ${slave.streak || 0} days</p>
             <button class="btn" onclick="closeSlaveStatsModal()">Close</button>
@@ -429,7 +812,7 @@ function loadManagement() {
         const slaveId = document.getElementById('taskSlave').value;
         const dependencies = document.getElementById('taskDependencies').value.split(',').map(id => id.trim()).filter(id => id);
         const recurring = document.getElementById('recurringTask').checked;
-        
+
         if (!title || !points) return showError('Title and points required');
 
         const taskData = {
@@ -552,9 +935,9 @@ function loadManagement() {
         const description = document.getElementById('rewardDescription').value.trim();
         const tier = document.getElementById('rewardTier').value;
         const expiration = document.getElementById('rewardExpiration').value;
-    
+
         if (!slaveId || !points || slaveId === 'all') return showError('Select a specific slave and enter points');
-    
+
         const rewardData = {
             id: Date.now().toString() + Math.random().toString(36).substr(2, 9), // Unique ID for each reward entry
             points,
@@ -564,12 +947,12 @@ function loadManagement() {
             timestamp: new Date().toISOString(),
             ...(expiration && { expiration: firebase.firestore.Timestamp.fromDate(new Date(expiration)) })
         };
-    
+
         const rewardRef = db.collection('rewards').doc(slaveId);
         rewardRef.get().then(doc => {
             const currentPoints = doc.exists ? (doc.data().points || 0) : 0;
             const currentHistory = doc.exists ? (doc.data().history || []) : [];
-    
+
             rewardRef.set({
                 points: currentPoints + points,
                 history: [...currentHistory, rewardData],
@@ -604,8 +987,8 @@ function loadManagement() {
                 const slaveId = doc.id;
                 db.collection('rewards').doc(slaveId).get().then(rewardDoc => {
                     const currentPoints = rewardDoc.exists ? rewardDoc.data().points || 0 : 0;
-                    db.collection('rewards').doc(slaveId).set({ 
-                        points: currentPoints + points, 
+                    db.collection('rewards').doc(slaveId).set({
+                        points: currentPoints + points,
                         history: firebase.firestore.FieldValue.arrayUnion(rewardData)
                     }, { merge: true });
                     db.collection('slaves').doc(slaveId).update({ level: Math.floor((currentPoints + points) / 100) + 1 });
@@ -634,12 +1017,12 @@ function loadManagement() {
         const rewardList = document.getElementById('rewardList');
         rewardList.innerHTML = ''; // Clear the list to prevent duplicates
         const renderedIds = new Set(); // Track rendered reward IDs to avoid duplicates
-    
+
         snap.forEach(doc => {
             db.collection('slaves').doc(doc.id).get().then(slaveDoc => {
                 const slaveName = slaveDoc.exists ? slaveDoc.data().username : 'Unknown';
                 const history = doc.data().history || [];
-    
+
                 history.forEach(h => {
                     if (!renderedIds.has(h.id)) { // Only render if ID hasn’t been seen
                         const item = document.createElement('div');
@@ -681,10 +1064,10 @@ function loadManagement() {
         const content = document.getElementById('lessonContent').value.trim();
         const schedule = document.getElementById('lessonSchedule').value;
         if (!title || !content) return showError('Title and content required');
-        db.collection('lessons').add({ 
-            title, 
-            content, 
-            quizzes: quizQuestions, 
+        db.collection('lessons').add({
+            title,
+            content,
+            quizzes: quizQuestions,
             timestamp: firebase.firestore.FieldValue.serverTimestamp(),
             ...(schedule && { scheduled: firebase.firestore.Timestamp.fromDate(new Date(schedule)) })
         });
@@ -787,15 +1170,15 @@ function loadManagement() {
         const recurring = document.getElementById('eventRecurring').value;
         const reminder = document.getElementById('eventReminder').checked;
         if (!title || !endDate) return showError('Title and end date required');
-        db.collection('events').add({ 
-            title, 
-            type, 
-            description, 
-            endDate: firebase.firestore.Timestamp.fromDate(endDate), 
-            recurring, 
-            reminder, 
+        db.collection('events').add({
+            title,
+            type,
+            description,
+            endDate: firebase.firestore.Timestamp.fromDate(endDate),
+            recurring,
+            reminder,
             rsvps: [],
-            timestamp: firebase.firestore.FieldValue.serverTimestamp() 
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
         clearForm('eventForm');
         showNotification('Event created');
@@ -899,11 +1282,20 @@ function deleteItem(itemId) { firebase.firestore().collection('shop').doc(itemId
 function deleteEvent(eventId) { firebase.firestore().collection('events').doc(eventId).delete().then(() => showNotification('Event deleted')); }
 
 // Communication
-function loadCommunication(uid) {
+function loadCommunication() {
     const db = firebase.firestore();
+    const rtDb = firebase.database();
     const chatList = document.getElementById('chatList');
     const chatMessages = document.getElementById('chatMessages');
+    const unreadBadge = document.getElementById('unreadBadge');
     let currentChat = null;
+    let unreadCount = 0;
+
+    // Track unread messages across all chats
+    function updateUnreadBadge() {
+        unreadBadge.innerText = unreadCount;
+        unreadBadge.style.display = unreadCount > 0 ? 'block' : 'none';
+    }
 
     db.collection('slaves').where('allowed', '==', true).onSnapshot(snap => {
         chatList.innerHTML = '';
@@ -913,27 +1305,59 @@ function loadCommunication(uid) {
             chatItem.className = 'chat-item';
             chatItem.dataset.slaveId = doc.id;
             chatItem.innerHTML = `
-                <div class="profile-circle">${slave.username.charAt(0).toUpperCase()}</div>
+                <div class="profile-circle" id="profile-${doc.id}">
+                    ${slave.username.charAt(0).toUpperCase()}
+                    <span class="online-indicator" id="online-${doc.id}" style="display: none;"></span>
+                </div>
                 <div class="chat-info">
                     <span class="chat-username">${slave.username}</span>
                     <span class="chat-last-message" id="lastMessage-${doc.id}"></span>
                 </div>
                 <span class="chat-timestamp" id="timestamp-${doc.id}"></span>
+                <span class="unread-count" id="unread-${doc.id}" style="display: none;">0</span>
             `;
             chatItem.addEventListener('click', () => {
                 document.querySelectorAll('.chat-item').forEach(item => item.classList.remove('active'));
                 chatItem.classList.add('active');
                 currentChat = doc.id;
                 loadChatMessages(doc.id, slave.username);
+                markAsRead(doc.id);
             });
             chatList.appendChild(chatItem);
 
-            firebase.database().ref(`chats/${doc.id}/messages`).orderByChild('timestamp').limitToLast(1).on('value', snap => {
-                const lastMsg = snap.val();
-                if (lastMsg) {
-                    const msg = Object.values(lastMsg)[0];
-                    document.getElementById(`lastMessage-${doc.id}`).innerText = msg.text.slice(0, 20) + (msg.text.length > 20 ? '...' : '');
-                    document.getElementById(`timestamp-${doc.id}`).innerText = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            // Online Status
+            rtDb.ref(`presence/${doc.id}`).on('value', snap => {
+                const onlineIndicator = document.getElementById(`online-${doc.id}`);
+                onlineIndicator.style.display = snap.val() ? 'block' : 'none';
+                onlineIndicator.style.background = snap.val() ? '#43b581' : '#747f8d';
+            });
+
+            // Typing Indicator
+            rtDb.ref(`typing/${doc.id}`).on('value', snap => {
+                if (currentChat === doc.id && snap.val()) {
+                    const typingDiv = document.createElement('div');
+                    typingDiv.className = 'chat-message other typing-indicator';
+                    typingDiv.innerText = `${slave.username} is typing...`;
+                    chatMessages.appendChild(typingDiv);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                    setTimeout(() => typingDiv.remove(), 2000);
+                }
+            });
+
+            // Last Message and Unread Count
+            rtDb.ref(`chats/${doc.id}/messages`).orderByChild('timestamp').on('value', snap => {
+                const messages = snap.val();
+                if (messages) {
+                    const lastMsg = Object.values(messages).slice(-1)[0];
+                    document.getElementById(`lastMessage-${doc.id}`).innerText = lastMsg.text.slice(0, 20) + (lastMsg.text.length > 20 ? '...' : '');
+                    document.getElementById(`timestamp-${doc.id}`).innerText = new Date(lastMsg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                    const unread = Object.values(messages).filter(msg => msg.from !== 'Goddess' && !msg.read && new Date(msg.timestamp) > (slave.lastRead || 0)).length;
+                    const unreadSpan = document.getElementById(`unread-${doc.id}`);
+                    unreadSpan.innerText = unread;
+                    unreadSpan.style.display = unread > 0 ? 'block' : 'none';
+                    unreadCount = Array.from(chatList.querySelectorAll('.unread-count')).reduce((sum, span) => sum + parseInt(span.innerText || 0), 0);
+                    updateUnreadBadge();
                 }
             });
         });
@@ -943,13 +1367,13 @@ function loadCommunication(uid) {
         document.getElementById('chatRecipientName').innerText = username;
         document.getElementById('chatProfileCircle').innerText = username.charAt(0).toUpperCase();
         chatMessages.innerHTML = '';
-        firebase.database().ref(`chats/${slaveId}/messages`).orderByChild('timestamp').on('value', snap => {
+        rtDb.ref(`chats/${slaveId}/messages`).orderByChild('timestamp').on('value', snap => {
             chatMessages.innerHTML = '';
             const messages = snap.val();
             if (messages) {
                 Object.values(messages).forEach(msg => {
                     const msgDiv = document.createElement('div');
-                    msgDiv.className = `chat-message ${msg.from === uid ? 'self' : 'other'}`;
+                    msgDiv.className = `chat-message ${msg.from === 'Goddess' ? 'self' : 'other'}`;
                     msgDiv.innerText = msg.text;
                     chatMessages.appendChild(msgDiv);
                 });
@@ -958,27 +1382,62 @@ function loadCommunication(uid) {
         });
     }
 
-    function sendMessage() {
-        const text = document.getElementById('chatInput').value.trim();
-        if (!text || !currentChat) return showError('Select a chat and enter a message');
-        const chatRef = firebase.database().ref(`chats/${currentChat}/messages`).push();
-        chatRef.set({
-            from: uid,
-            fromName: 'Goddess',
-            text,
-            timestamp: firebase.database.ServerValue.TIMESTAMP
-        }).then(() => {
-            document.getElementById('chatInput').value = '';
-            showNotification('Message sent');
+    function markAsRead(slaveId) {
+        rtDb.ref(`chats/${slaveId}/messages`).once('value', snap => {
+            const updates = {};
+            const messages = snap.val();
+            if (messages) {
+                Object.entries(messages).forEach(([key, msg]) => {
+                    if (msg.from !== 'Goddess' && !msg.read) {
+                        updates[`${key}/read`] = true;
+                    }
+                });
+                rtDb.ref(`chats/${slaveId}/messages`).update(updates);
+                unreadCount -= parseInt(document.getElementById(`unread-${slaveId}`).innerText || 0);
+                document.getElementById(`unread-${slaveId}`).innerText = '0';
+                document.getElementById(`unread-${slaveId}`).style.display = 'none';
+                updateUnreadBadge();
+            }
         });
     }
 
+    function sendMessage() {
+        const text = document.getElementById('chatInput').value.trim();
+        if (!text || !currentChat) return showError('Select a chat and enter a message');
+        const chatRef = rtDb.ref(`chats/${currentChat}/messages`).push();
+        chatRef.set({
+            from: 'Goddess', // Static identifier for Goddess
+            fromName: 'Goddess',
+            text,
+            timestamp: firebase.database.ServerValue.TIMESTAMP,
+            read: false
+        }).then(() => {
+            document.getElementById('chatInput').value = '';
+            showNotification('Message sent');
+            db.collection('slaves').doc(currentChat).update({
+                lastRead: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        });
+    }
+
+    // Typing Indicator for Goddess
+    let typingTimeout;
+    document.getElementById('chatInput').addEventListener('input', () => {
+        if (currentChat) {
+            rtDb.ref(`typing/goddess`).set(true); // Use 'goddess' as static ID
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => rtDb.ref(`typing/goddess`).set(false), 1000);
+        }
+    });
+
+    document.getElementById('sendMessage').style.borderRadius = '50%';
+    document.getElementById('sendMessage').style.background = '5865f2';
     document.getElementById('sendMessage').addEventListener('click', sendMessage);
     document.getElementById('chatInput').addEventListener('keypress', e => {
         if (e.key === 'Enter') sendMessage();
     });
 
-    // Group Chat
+    // Group Chat, Commands, Announcements (unchanged)
     document.getElementById('createGroupChat').addEventListener('click', () => {
         const name = document.getElementById('groupChatName').value.trim();
         if (!name) return showError('Group name required');
@@ -1005,7 +1464,6 @@ function loadCommunication(uid) {
         });
     });
 
-    // Commands
     document.getElementById('sendCommand').addEventListener('click', () => {
         const text = document.getElementById('commandInput').value.trim();
         if (!text) return showError('Command required');
@@ -1031,7 +1489,6 @@ function loadCommunication(uid) {
         });
     });
 
-    // Announcements
     document.getElementById('sendAnnouncement').addEventListener('click', () => {
         const text = document.getElementById('announcementInput').value.trim();
         const schedule = document.getElementById('announcementSchedule').value;
@@ -1058,6 +1515,16 @@ function loadCommunication(uid) {
         });
     });
 }
+
+// Presence Tracking for Goddess
+firebase.auth().onAuthStateChanged(user => {
+    if (user) {
+        const uid = user.uid;
+        const presenceRef = firebase.database().ref(`presence/${uid}`);
+        presenceRef.set(true);
+        presenceRef.onDisconnect().set(false);
+    }
+});
 
 function deleteGroupChat(groupId) { firebase.firestore().collection('groupChats').doc(groupId).delete().then(() => showNotification('Group chat deleted')); }
 function deleteCommand(commandId) { firebase.firestore().collection('commands').doc(commandId).delete().then(() => showNotification('Command deleted')); }

@@ -60,14 +60,14 @@ body {
     font-weight: 600;
     border-radius: 3px;
     cursor: pointer;
-    background: #7289da;
+    background: #5865f2;
     border: none;
     color: #fff;
     transition: background 0.2s ease;
 }
 
 .btn:hover {
-    background: #5a6db0;
+    background: #5865f2;
 }
 
 .logout {
@@ -306,7 +306,9 @@ body {
     align-items: center;
 }
 
-.form input, .form select, .form textarea {
+.form input,
+.form select,
+.form textarea {
     padding: 8px 12px;
     background: #202225;
     color: #dcddde;
@@ -316,7 +318,9 @@ body {
     transition: background 0.2s ease;
 }
 
-.form input:focus, .form select:focus, .form textarea:focus {
+.form input:focus,
+.form select:focus,
+.form textarea:focus {
     background: #292b2f;
     outline: none;
 }
@@ -340,15 +344,18 @@ body {
     height: 100%;
     display: flex;
     padding: 0;
-    overflow-y: auto; /* Scroll if content exceeds */
+    overflow-y: auto;
+    /* Scroll if content exceeds */
     min-height: 0;
 }
+
 #communication #chat {
     height: 100%;
     display: flex;
     position: relative;
     padding: 0;
 }
+
 .chat-layout {
     display: flex;
     height: 100%;
@@ -521,7 +528,8 @@ body {
     border-radius: 50%;
 }
 
-.send-btn:hover, .voice-btn:hover {
+.send-btn:hover,
+.voice-btn:hover {
     transform: translateX(3px);
     background: #5865f2;
 }
@@ -562,8 +570,13 @@ body {
 }
 
 @keyframes slideIn {
-    from { transform: translateX(-100%); }
-    to { transform: translateX(0); }
+    from {
+        transform: translateX(-100%);
+    }
+
+    to {
+        transform: translateX(0);
+    }
 }
 
 /* Modal */
@@ -887,13 +900,37 @@ button.btn.logout:hover {
     border-left: 4px solid transparent;
 }
 
-#taskList.sortable .item.low { border-left-color: #43b581; }
-#taskList.sortable .item.medium { border-left-color: #faa61a; }
-#taskList.sortable .item.high { border-left-color: #f04747; }
-#taskList.sortable .item:hover { background: #4e5157; }
-#taskList.sortable .item.dragging { opacity: 0.6; }
-#taskList.sortable .item input.task-select { margin-right: 10px; accent-color: #7289da; }
-.task-progress { padding: 4px 8px; background: rgba(67, 181, 129, 0.2); color: #43b581; border-radius: 4px; }
+#taskList.sortable .item.low {
+    border-left-color: #43b581;
+}
+
+#taskList.sortable .item.medium {
+    border-left-color: #faa61a;
+}
+
+#taskList.sortable .item.high {
+    border-left-color: #f04747;
+}
+
+#taskList.sortable .item:hover {
+    background: #4e5157;
+}
+
+#taskList.sortable .item.dragging {
+    opacity: 0.6;
+}
+
+#taskList.sortable .item input.task-select {
+    margin-right: 10px;
+    accent-color: #7289da;
+}
+
+.task-progress {
+    padding: 4px 8px;
+    background: rgba(67, 181, 129, 0.2);
+    color: #43b581;
+    border-radius: 4px;
+}
 
 #rewardList .item,
 #lessonList .item,
@@ -1083,4 +1120,133 @@ button.btn.logout:hover {
     background: #2f3136;
     padding: 10px 12px;
     border-radius: 3px;
+}
+
+.recent-activity,
+.performance-trends,
+.custom-widgets {
+    background: #2f3136;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.recent-activity h3,
+.performance-trends h3,
+.custom-widgets h3 {
+    color: #fff;
+    margin-bottom: 10px;
+}
+
+#activityLog .item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: #36393f;
+    margin-bottom: 5px;
+}
+
+#trendFilters {
+    margin-bottom: 15px;
+}
+
+#trendChart {
+    max-height: 300px;
+    background: #1a191e;
+    padding: 10px;
+    border-radius: 3px;
+}
+
+.custom-widgets .card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.custom-widgets .card button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    padding: 4px 8px;
+    font-size: 0.75rem;
+}
+
+.badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #f04747;
+    color: #fff;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    padding-left: 0;
+    padding-top: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.online-indicator {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid #1a191e;
+}
+
+.unread-count {
+    background: #f04747;
+    color: #fff;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    padding-left: 6px;
+    padding-top: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    margin-left: 10px;
+}
+
+.typing-indicator {
+    font-style: italic;
+    color: #b9bbbe;
+    background: #252525;
+    padding: 5px 10px;
+    border-radius: 10px;
+    max-width: 50%;
+    align-self: flex-start;
+}
+
+#passwordModal {
+    display: flex; /* Initially visible */
+    z-index: 9999; /* Above all other content */
+}
+
+#passwordModal .modal-content {
+    max-width: 400px;
+    text-align: center;
+}
+
+#goddessPassword {
+    width: 100%;
+    margin: 10px 0;
+    padding: 12px;
+    background: #202225;
+    border: 1px solid #1a1b1e;
+    border-radius: 4px;
+    color: #dcddde;
+    font-size: 14px;
+}
+
+#passwordError {
+    margin-top: 10px;
+    font-size: 0.9rem;
 }
