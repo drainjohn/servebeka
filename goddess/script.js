@@ -257,15 +257,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('slavesBtn')?.click();
 });
 
-// Authentication
-firebase.auth().onAuthStateChanged(user => {
-    if (!user || user.email !== 'kohzanden@gmail.com') {
-        window.location.href = '../../Platform/index.html';
-    } else {
-        loadGoddessData(user);
-    }
-});
-
 document.getElementById('logoutBtn').addEventListener('click', () => {
     firebase.auth().signOut().then(() => window.location.href = '../../Platform/index.html');
 });
